@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Nadia’s Memory Album 🦋</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #6a0dad, #d188ff, #a266ff);
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      position: relative;
+      touch-action: pan-y;
+    }
+
+    body {
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="24">🦋</text></svg>'), auto;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;600&display=swap');
+
+    h2 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2.8rem;
+      text-align: center;
+      margin: 15px 0 5px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.7);
+      animation: glow 2s infinite alternate;
+      z-index: 10;
+      position: relative;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #fff, 0 0 20px #ff00ff; }
+      to { text-shadow: 0 0 20px #fff, 0 0 40px #da70d6, 0 0 60px #da70d6; }
+    }
+
+    .instructions {
+      text-align: center;
+      font-size: 0.9rem;
+      opacity: 0.7;
+      margin-bottom: 8px;
+      animation: pulse 2s infinite;
+      z-index: 10;
+      position: relative;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 0.9; }
+    }
+
+    .carousel-container {
+      width: 100%;
+      height: calc(100% - 120px);
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .carousel {
+      display: flex;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      height: 100%;
+    }
+
+    .slide {
+      min-width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+      position: relative;
+    }
+
+    .slide img {
+      max-width: 95%;
+      max-height: 85%;
+      height: auto;
+      border-radius: 25px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      transition: all 0.5s ease;
+      transform: rotate(-2deg);
+      animation: float 4s ease-in-out infinite;
+      border: 4px solid rgba(255,255,255,0.3);
+    }
+
+    .slide img:hover {
+      transform: rotate(2deg) scale(1.03);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(212, 136, 255, 0.6);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-15px) rotate(2deg); }
+    }
+
+    .caption {
+      font-size: 1.2rem;
+      text-align: center;
+      background: rgba(106, 13, 173, 0.85);
+      padding: 12px 20px;
+      border-radius: 18px;
+      margin-top: 15px;
+      width: 90%;
+      max-width: 400px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2);
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 1s ease-out;
+      font-weight: 500;
+      z-index: 5;
+    }
+
+    .caption.fade-out {
+      opacity: 0;
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      margin: 15px auto 10px;
+      gap: 8px;
+      z-index: 10;
+      position: relative;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 6px rgba(0,0,0,0.3);
+    }
+
+    .dot:hover {
+      transform: scale(1.2);
+    }
+
+    .dot.active {
+      background: white;
+      box-shadow: 0 0 10px #d188ff, 0 0 16px #d188ff;
+      transform: scale(1.3);
+    }
+
+    /* Navigation Arrows */
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 3rem;
+      color: white;
+      background: rgba(106, 13, 173, 0.4);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      user-select: none;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .nav-arrow:hover {
+      background: rgba(135, 40, 200, 0.6);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .nav-arrow.left {
+      left: 20px;
+    }
+
+    .nav-arrow.right {
+      right: 20px;
+    }
+
+    /* Butterfly follower */
+    .butterfly-follower {
+      position: fixed;
+      font-size: 1.8rem;
+      pointer-events: none;
+      z-index: 1000;
+      transition: transform 0.1s ease-out;
+      filter: drop-shadow(0 0 4px rgba(255,255,255,0.8));
+    }
+
+    /* Sparkles */
+    .sparkle {
+      position: fixed;
+      pointer-events: none;
+      font-size: 1.5rem;
+      animation: sparkleFade 1s forwards;
+      z-index: 999;
+    }
+
+    @keyframes sparkleFade {
+      0% { transform: scale(0); opacity: 0.8; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    /* Floating decorations */
+    .deco {
+      position: fixed;
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: 1;
+      animation: float 6s ease-in-out infinite;
+      font-size: 1.3rem;
+    }
+
+    @media (max-width: 600px) {
+      h2 { font-size: 2.2rem; }
+      .slide img { max-height: 80%; }
+      .nav-arrow {
+        font-size: 2.5rem;
+        width: 50px;
+        height: 50px;
+      }
+    }
+  </style>
+
+</head>
+<body>
+     <a href="flower.html" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: rgba(199, 25, 25, 0.2); backdrop-filter: blur(8px); color: white; text-decoration: none; border-radius: 30px; font-family: 'Poppins', sans-serif; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); z-index: 9999; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
+    <svg height="18" width="18" fill="#FFFFFF" viewBox="0 0 24 24">
+      <path d="M5,3H19A2,2,0,0,1,21,5V19a2,2,0,0,1-2,2H5a2,2,0,0,1-2-2V5A2,2,0,0,1,5,3Zm2,2V19h10V5Zm2,3h2v8H9Z"/>
+    </svg>
+    Birthday Wishes!
+  </a>
+
+  <!-- Floating Decorations -->
+  <div class="deco" style="top:15%; left:8%; animation-delay:0s;">🦋</div>
+  <div class="deco" style="top:25%; right:6%; animation-delay:1s;">💜</div>
+  <div class="deco" style="bottom:20%; left:12%; animation-delay:2s;">🦋</div>
+  <div class="deco" style="top:65%; right:10%; animation-delay:0.5s;">✨</div>
+
+  <h2>✨ Swipe Through Magical Moments ✨</h2>
+  <div class="instructions">← Swipe, Click Arrows, Dots, or Keyboard →</div>
+
+  <div class="carousel-container">
+    <div class="carousel" id="carousel">
+      <!-- 9 Photos: images/nadia1.jpg to images/nadia9.jpg -->
+      <div class="slide">
+        <img src="images/nadia1.jpg" alt="Memory 1">
+        <div class="caption">“You were glowing this day 💜”</div>
+      </div>
+      <div class="slide">
+        <img src="images/nadia2.jpg" alt="Memory 2">
+        <div class="caption">“This laugh? Iconic 🤣”</div>
+      </div>
+      <div class="slide">
+        <img src="images/nadia3.jpg" alt="Memory 3">
+        <div class="caption">“Purple queen in her element 👑”</div>
+      </div>
+      <div class="slide">
+        <img src="images/nadia4.jpg" alt="Memory 4">
+        <div class="caption">“Rwanda’s pride, our joy 🇷🇼”</div>
+      </div>
+      <div class="slide">
+        <img src="images/nadia5.jpg" alt="Memory 5">
+        <div class="caption">“Butterfly energy, always 🦋”</div>
+      </div>
+      <div class="slide">
+        <img src="images/nadia6.jpg" alt="Memory 6">
+        <div class="caption">“18 never looked so good 🎉”</div>
+      </div>
+      <div class="slide">
+        <img src="images/nadia7.jpg" alt="Memory 7">
+        <div class="caption">“This moment? Pure magic ✨”</div>
+      </div>
+      <div class="slide">
+        <img src="images/nadia8.jpg" alt="Memory 8">
+        <div class="caption">“You + joy = this photo 😍”</div>
+      </div>
+      <div class="slide">
+        <img src="images/tenzin1.JPG" alt="Memory 10">
+        <div class="caption">“You were glowing this day 💜”</div>
+      </div>
+      <div class="slide">
+        <img src="images/nadia9.jpg" alt="Memory 9">
+        <div class="caption">“And this? Just the beginning 💖”</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <!-- Navigation Arrows -->
+  <div class="nav-arrow left" onclick="prevSlide()">‹</div>
+  <div class="nav-arrow right" onclick="nextSlide()">›</div>
+
+  <!-- Butterfly that follows cursor -->
+  <div class="butterfly-follower">🦋</div>
+
+  <script>
+    const carousel = document.getElementById('carousel');
+    const slides = document.querySelectorAll('.slide');
+    const dotsContainer = document.getElementById('dots');
+    const follower = document.querySelector('.butterfly-follower');
+    let currentIndex = 0;
+    let isDragging = false;
+
+    // Create dots
+    slides.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.classList.add('dot');
+      if (i === 0) dot.classList.add('active');
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll('.dot');
+
+    function updateDots() {
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+      });
+    }
+
+    function goToSlide(index) {
+      currentIndex = index;
+      carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+      updateDots();
+      resetCaptionTimers();
+      createSparkles();
+    }
+
+    function nextSlide() {
+      if (currentIndex >= slides.length - 1) {
+        currentIndex = -1; // loop to start
+      }
+      goToSlide(currentIndex + 1);
+    }
+
+    function prevSlide() {
+      if (currentIndex <= 0) {
+        currentIndex = slides.length; // loop to end
+      }
+      goToSlide(currentIndex - 1);
+    }
+
+    // Touch swipe
+    let startX = 0;
+    carousel.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+    });
+
+    carousel.addEventListener('touchend', e => {
+      const endX = e.changedTouches[0].clientX;
+      handleSwipe(startX, endX);
+    });
+
+    // Mouse drag
+    let mouseStartX = 0;
+
+    carousel.addEventListener('mousedown', e => {
+      isDragging = true;
+      mouseStartX = e.clientX;
+      carousel.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      carousel.style.cursor = 'grab';
+    });
+
+    carousel.addEventListener('mouseleave', () => {
+      isDragging = false;
+      carousel.style.cursor = 'grab';
+    });
+
+    carousel.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      const mouseEndX = e.clientX;
+      const diff = mouseStartX - mouseEndX;
+      carousel.style.transform = `translateX(-${currentIndex * 100}%) translateX(-${diff * 0.3}px)`;
+    });
+
+    carousel.addEventListener('mouseup', e => {
+      if (!isDragging) return;
+      const mouseEndX = e.clientX;
+      handleSwipe(mouseStartX, mouseEndX);
+    });
+
+    function handleSwipe(start, end) {
+      const diff = start - end;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
+      } else {
+        carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+      }
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+
+    // Butterfly follows cursor
+    document.addEventListener('mousemove', e => {
+      follower.style.transform = `translate(${e.clientX - 18}px, ${e.clientY - 18}px)`;
+    });
+
+    // Sparkles on tap/click
+    function createSparkles() {
+      const sparkle = document.createElement('div');
+      sparkle.classList.add('sparkle');
+      sparkle.textContent = '✨';
+      sparkle.style.left = `${Math.random() * window.innerWidth}px`;
+      sparkle.style.top = `${Math.random() * window.innerHeight}px`;
+      document.body.appendChild(sparkle);
+
+      setTimeout(() => {
+        sparkle.remove();
+      }, 1000);
+    }
+
+    document.addEventListener('click', createSparkles);
+    setInterval(createSparkles, 9000);
+
+    // Auto-hide captions after 10s
+    function resetCaptionTimers() {
+      document.querySelectorAll('.caption').forEach(caption => {
+        caption.classList.remove('fade-out');
+        setTimeout(() => {
+          caption.classList.add('fade-out');
+        }, 10000);
+      });
+    }
+
+    // Initialize
+    resetCaptionTimers();
+  </script>
+
+</body>
+</html>
